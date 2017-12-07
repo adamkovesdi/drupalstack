@@ -84,11 +84,11 @@ CMD ["/usr/bin/start.sh"]
 Building the docker image
 ```
 $ cd singledocker
-$ docker build .
+$ docker build -t lamp .
 ```
 Running the docker image
 ```
-$ docker run --rm -it -p 9988:80 <image-name>
+$ docker run --name=lamp -it -p 9980:80 -p 93360:3360 lamp
 ```
 
 ### c) docker-compose implementation for the whole stack

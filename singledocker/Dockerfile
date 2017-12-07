@@ -18,6 +18,7 @@ RUN apt-get install -y \
     php7.0-dom \
     php7.0-curl \
     php7.0-mysql \
+    php7.0-gd \
     composer
 
 # Install Apache
@@ -32,8 +33,15 @@ RUN apt-get install -y mysql-client mysql-server
 # Copy configurations
 WORKDIR /var/www/application
 COPY apache.config /etc/apache2/sites-available/000-default.conf
-COPY index.php /var/www/application/public/
+# COPY index.php /var/www/application/public/
 COPY start.sh /usr/bin/
+
+# Copy Drupal tarball
+COPY drupal-8.4.3.tar.gz /var/www/application/
+# untar
+RUN tar xvzf drupal-8.4.3.tar.gz
+RUN mv drupal-8.4.3 public
+RUN chown -R www-data public
 
 # Publish Apache port
 EXPOSE 80
