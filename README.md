@@ -25,7 +25,7 @@ Virtual machine IP address
 
 #### Use Ansible to install the LAMP stack over Vagrant
 
-Ansible playbooks for deploying the LAMP stack are in [ansible/playbook.yml](ansible/playbook.yml)
+Ansible playbooks for deploying the LAMP stack are in [ansible/install-lamp.yml](ansible/install-lamp.yml)
 
 To deploy the LAMP stack, run:
 ```
