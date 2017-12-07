@@ -1,0 +1,16 @@
+#
+# Ansible playbook for DevOps challenge by adamkov (c)2017
+#
+
+---
+- hosts: all
+  vars:
+    - somevar: "somevalue"
+    - somevar: "somevalue"
+    - somevar: "somevalue"
+  roles:
+    - install-apache
+    - install-php
+    - install-mysql
+
+
