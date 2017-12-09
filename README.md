@@ -6,8 +6,9 @@ In this three part document I will outline how to create a hosting platform for 
 
 In order to be able to host Drupal one needs a machine/VM/cloud instance with a running webserver, PHP interpreter, and a database backend.
 Multiple ways to implement the hosting platform:
-- Vagrant VM
-- Single Docker image for the whole LAMP + Drupal stack
+- Bare metal Linux machine (not covered in this document)
+- Vagrant Virtual Machine
+- Single Docker image for the whole LAMP stack + Drupal
 - Docker compose set of images running components of the stack
 
 Components of the stack:
@@ -66,7 +67,7 @@ TODO: separate playbook functionality into roles
 
 ### Single docker image implementation
 
-Create a custom Dockerfile for having a docker image containing the whole LAMP stack.
+Created a custom Dockerfile for having a docker image containing the whole LAMP stack.
 
 Tweaked Dockerfile [singledocker/Dockerfile](singledocker/Dockerfile)
 ```
@@ -83,15 +84,17 @@ Running the docker image
 $ docker run --name=lamp -it -p 9980:80 -p 93360:3360 lamp
 
 this will run the docker image and publish the web service port on 9980 of the docker machine
+Drupal setup is done in start.sh
 ```
+Tweak [singledocker/start.sh](singledocker/start.sh) for your Drupal config
 
 ### docker-compose implementation for the whole stack
 
 TODO: separate components into docker images and create a whole stack instance using "docker-compose up"
 
 Component list:
-- Apache web server + PHP installed and configured
 - MySQL instance
+- Apache web server + PHP installed and configured (drupal docker image)
 
 ### AWS E2C instance implementation
 
@@ -107,6 +110,8 @@ TODO: AWS account, register, screenshots
 *This is only applicable to the Vagrant and AWS implementation as single docker image implementation and docker compose implementation already incorporates the installation of Drupal to the docker image(s).*
 
 TODO: work out this section
+
+Here we used Jeff Geering's ansible roles for installing Drush, and Drush
 
 ## Ruby application for monitoring a Drupal stack
 
@@ -175,9 +180,10 @@ TODO: return codes, for every case
 
 # Links, references
 
-
-
 - [Readme driven development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html)
+- [Jeff Geerling's excellent ansible roles](https://github.com/geerlingguy/ansible-role-drupal)
+- [ZopNow LAMP on docker](https://github.com/ZopNow/docker-lamp-stack)
+- [Drupal in dockerhub](https://hub.docker.com/_/drupal/)
 
 
 
