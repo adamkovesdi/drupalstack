@@ -39,6 +39,7 @@
         - php7.0-dom
         - php7.0-curl
         - php7.0-mysql
+        - php7.0-gd
         - composer
 
     - name: install MySQL dependencies 
@@ -103,6 +104,15 @@
         - 127.0.0.1
         - ::1
         - localhost 
+
+    - name: Apache site config
+      become: true
+      copy:
+        src: apache.config
+        dest: /etc/apache2/sites-available/000-default.conf
+      notify:
+        - restart apache2
+
 
   handlers:
     - name: restart apache2

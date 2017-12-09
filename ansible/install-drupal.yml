@@ -1,0 +1,74 @@
+#
+# Drush and Drupal installer playbook by adamkov 2017
+# special thanks to Jeff Geerling for his excellent Ansible roles (unused)
+#
+
+---
+- hosts: lamp
+  vars:
+    drush_version: "8.1.10"
+    drush_phar_url: https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar
+    drush_path: /usr/local/bin/drush
+    drupal_installpath: /var/www/html
+    drupal_uri: drupal
+    mysql_username: root
+    mysql_password: password
+    mysql_dbname: drupal_db
+    drupal_download_url: https://ftp.drupal.org/files/projects/drupal-8.0.1.tar.gz
+  tasks:
+    # Drush installation (unused yet)
+
+    - name: Check current state.
+      become: true
+      stat:
+        path: "{{ drush_path }}"
+      register: drush_path_state
+
+    - name: Perform cleanup of old symlink.
+      become: true
+      file:
+        path: "{{ drush_path }}"
+        state: absent
+      when: drush_path_state.stat.islnk is defined and drush_path_state.stat.islnk
+
+    - name: Install Drush.
+      become: true
+      get_url:
+        url: "{{ drush_phar_url }}"
+        dest: "{{ drush_path }}"
+
+    - name: Ensure Drush is executable.
+      become: true
+      file:
+        path: "{{ drush_path }}"
+        mode: 0755
+
+  #    - name: Create Drupal database with drush
+  #    command: "#  drush sql-create --db-su=root --db-su-pw=rootpassword --db-url=\"mysql://drupal_db_user:drupal_db_password@127.0.0.1/{{ mysql_dbname }}\" -y"
+  #    ignore_errors: yes
+
+    - name: Make sure www root is present 
+      file:
+        path: "{{ drupal_installpath }}"
+        state: directory
+        mode: 0775
+        owner: "www-data"
+        group: "www-data"
+      become: true
+
+    - name: Download and Unpack drupal files
+      become: true
+      become_user: www-data
+      unarchive:
+        src: "{{ drupal_download_url }}"
+        dest: /var/www/html/
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+
+    - name: Remove old index.html 
+      become: true
+      file:
+        path: /var/www/html/index.html 
+        state: absent
+
+
