@@ -1,5 +1,5 @@
 #
-# Ansible playbook for DevOps challenge by adamkov (c)2017
+# Ansible playbook for preparing Drupal hosting machines by adamkov (c)2017
 #
 
 ---
@@ -22,11 +22,14 @@
         - unzip
         - wget
         - curl
+        - python
+        - python-pip
 
     - name: install php 
       apt:
         name: "{{ item }}"
         state: present
+      become: true
       with_items:
         - php7.0
         - php7.0-cli
@@ -36,31 +39,56 @@
         - php7.0-curl
         - php7.0-mysql
         - composer
-            
+
+    - name: install MySQL dependencies 
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - libmysqlclient-dev
+
+
     - name: install utils
       apt:
         name: "{{ item }}"
         state: present
+      become: true
       with_items:
         - apache2
         - libapache2-mod-php7.0
 
     - name: enabled mod_rewrite
       apache2_module: name=rewrite state=present
+      become: true
       notify:
         - restart apache2
 
+    - name: upgrade PIP to latest 
+      become: true
+      pip:
+        name: pip
+        state: latest
+
+    - name: install mysql python module
+      become: true
+      pip:
+        name: mysqlclient 
+        state: latest
+
     - name: Install MySQL
       apt: name={{ item }} state=present
+      become: true
       with_items:
         - python-mysqldb
         - mysql-server
     - name: Start the MySQL service
+      become: true
       service: 
         name: mysql 
         state: started
         enabled: true
     - name: update mysql root password for all root accounts
+      become: true
       mysql_user: 
         name: root 
         host: "{{ item }}" 
@@ -77,6 +105,7 @@
 
   handlers:
     - name: restart apache2
+      become: true
       service: name=apache2 state=restarted
 
 

@@ -1,16 +1,22 @@
-# Implementing Drupal hosting solutions
+# Implementing a Drupal hosting solution
+
+In this three part document I will outline how to create a hosting platform for Drupal, deploy Drupal using automation, and I will write a simple ruby application to monitor the status of a Drupal website.
 
 ## Creating a LAMP stack machine 
 
-In order to be able to host Drupal one needs a machine/VM/cloud instance with a running webserver, PHP interpreter, and a database backend.  
-In this document I will outline multiple ways to implement that solution.  
+In order to be able to host Drupal one needs a machine/VM/cloud instance with a running webserver, PHP interpreter, and a database backend.
+Multiple ways to implement the hosting platform:
+- Vagrant VM
+- Single Docker image for the whole LAMP + Drupal stack
+- Docker compose set of images running components of the stack
 
-Components:
+Components of the stack:
 - Apache 2 web server
 - PHP 7
 - MySQL database
+- Drupal
 
-### a) Vagrant box implementation
+### Vagrant box implementation
 
 LAMP stack machine is a Vagrant VM based on official Ubuntu Xenial image  
 Vagrant file for setting up a new VM is present in [vagrant/Vagrantfile](vagrant/Vagrantfile)  
@@ -26,67 +32,45 @@ login credentials
 user: vagrant
 pass: vagrant
 ```
-Virtual machine IP address
+Virtual machine IP address (default in the provided Vagrantfile)
 ```
 192.168.33.10
 ```
+IP address can be changed by editing the Vagrantfile [vagrant/Vagrantfile](vagrant/Vagrantfile)
 
 #### Use Ansible to install the LAMP stack over Vagrant
 
 Ansible playbooks for deploying the LAMP stack are in [ansible/install-lamp.yml](ansible/install-lamp.yml)
 
-To deploy the LAMP stack, run:
+First edit Ansible inventory for your LAMP machine [ansible/inventory](ansible/inventory)
+
+```
+...
+
+[lamp]
+192.168.33.10 # <--- change this to your LAMP machine IP address
+```
+
+To deploy the LAMP stack, run the provided ansible playbook:
 ```
 $ cd ansible
 $ ansible-playbook install-lamp.yml
 ```
 
-### b) single docker image implementation
+Comments on my playbook:
+- python 2 is required for mysql modules
+- pip is installed by the playbook
+- mysql ansible module is installed by Ansible pip module
 
-Easy route: use pre-made docker image and tweak it:  
-https://github.com/ZopNow/docker-lamp-stack
+TODO: separate playbook functionality into roles
 
-Tweaked Dockerfile
+### Single docker image implementation
+
+Create a custom Dockerfile for having a docker image containing the whole LAMP stack.
+
+Tweaked Dockerfile [singledocker/Dockerfile](singledocker/Dockerfile)
 ```
-FROM ubuntu:16.04
-
-# APT package manager update and upgrade
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y vim unzip wget curl
-
-# Install PHP
-RUN apt-get install -y \
-    php7.0 \
-    php7.0-cli \
-    php7.0-mbstring \ 
-    php7.0-zip \
-    php7.0-dom \
-    php7.0-curl \
-    php7.0-mysql \
-    composer
-
-# Install Apache
-RUN apt-get install -y apache2 libapache2-mod-php7.0
-RUN a2enmod rewrite
-
-# Install MySQL
-RUN echo 'mysql-server mysql-server/root_password password password' | debconf-set-selections
-RUN echo 'mysql-server mysql-server/root_password_again password password' | debconf-set-selections
-RUN apt-get install -y mysql-client mysql-server
-
-# Copy configurations
-WORKDIR /var/www/application
-COPY apache.config /etc/apache2/sites-available/000-default.conf
-COPY index.php /var/www/application/public/
-COPY start.sh /usr/bin/
-
-# Publish Apache port
-EXPOSE 80
-# Publish MySQL port
-EXPOSE 3306
-
-# Entrypoint for docker
-CMD ["/usr/bin/start.sh"]
+TODO: embed dockerfile here
 ```
 
 Building the docker image
@@ -97,33 +81,46 @@ $ docker build -t lamp .
 Running the docker image
 ```
 $ docker run --name=lamp -it -p 9980:80 -p 93360:3360 lamp
+
+this will run the docker image and publish the web service port on 9980 of the docker machine
 ```
 
-### c) docker-compose implementation for the whole stack
+### docker-compose implementation for the whole stack
 
-TODO: separate components into docker images and create the whole running "docker-compose up"
+TODO: separate components into docker images and create a whole stack instance using "docker-compose up"
 
 Component list:
 - Apache web server + PHP installed and configured
 - MySQL instance
 
-### d) AWS E2C instance implementation
+### AWS E2C instance implementation
 
-Can be provisioned for LAMP stack using Ansible playbooks in implementation a) Vagrant box
-TODO: AWS account required
+The LAMP stack hosting machine can be an AWS E2C instance (t2.micro is free for testing).
 
-## Ruby application
+Once the AWS E2C instance has been created using AWS web console one can use the Ansible playbook from the first section to deploy the LAMP stack on the machine.
+
+TODO: AWS account, register, screenshots  
+
+
+## Install Drupal from an Ansible playbook
+
+*This is only applicable to the Vagrant and AWS implementation as single docker image implementation and docker compose implementation already incorporates the installation of Drupal to the docker image(s).*
+
+TODO: work out this section
+
+## Ruby application for monitoring a Drupal stack
 
 ### Part 1: Testing a drupal site (service level ping)
 
-This is a web application implemented using Sinatra to test a Drupal site for response code/content.  
+A RESTful ruby web application implemented using Sinatra to test a Drupal site for response code/content.  
 
 A site is considered live when:
-- Returning HTTP status code 200 OK and  
+- HTTP GET request returns status code 200 OK
 - We can match some content to a pre-defined pattern
 
 ### Part 2: Bringing the site up/down
 
+If the service is runnig on AWS the provided ruby script can start/stop the instance  
 TODO: this needs access to AWS, using AWS SDK - unable to test
 
 In the ruby application the following code is used to start an AWS instance:
@@ -173,6 +170,14 @@ end
 
 ```
 TODO: return codes, for every case
+
+
+
+# Links, references
+
+
+
+- [Readme driven development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html)
 
 
 

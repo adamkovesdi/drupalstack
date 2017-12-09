@@ -17,3 +17,6 @@ mkdir -p /home/$USERNAME/.ssh
 cp /home/ubuntu/.ssh/authorized_keys /home/$USERNAME/.ssh/authorized_keys
 chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
 
+# install python
+apt-get update
+apt-get install -y python
