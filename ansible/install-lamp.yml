@@ -3,7 +3,7 @@
 #
 
 ---
-- hosts: all
+- hosts: lamp
   become: true
   vars:
     - somevar: "somevalue"
@@ -24,6 +24,7 @@
         - curl
         - python
         - python-pip
+        - git
 
     - name: install php 
       apt:

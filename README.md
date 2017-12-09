@@ -1,6 +1,6 @@
 # Implementing a Drupal hosting solution
 
-In this three part document I will outline how to create a hosting platform for Drupal, deploy Drupal using automation, and I will write a simple ruby application to monitor the status of a Drupal website.
+In this three part document I will outline how to create a hosting platform for Drupal, deploy Drupal using automation, and I will write a simple Ruby application to monitor the status of a Drupal website.
 
 ## Creating a LAMP stack machine 
 
@@ -49,13 +49,13 @@ IP address can be changed by editing the Vagrantfile [vagrant/Vagrantfile](vagra
 
 Ansible playbooks for deploying the LAMP stack are in [ansible/install-lamp.yml](ansible/install-lamp.yml)
 
-First edit Ansible inventory for your LAMP machine [ansible/inventory](ansible/inventory)
+First edit Ansible inventory file to reflect your machine address [ansible/inventory](ansible/inventory)
 
 ```
 ...
-
 [lamp]
-192.168.33.10 # <--- change this to your LAMP machine IP address
+192.168.33.10
+# ^^^ change this to your LAMP machine IP address
 ```
 
 To deploy the LAMP stack, run the provided ansible playbook:
@@ -73,7 +73,7 @@ TODO: separate playbook functionality into roles
 
 ### Single docker container implementation
 
-Custom Dockerfile for creating a docker image containing the whole LAMP stack.
+Custom [Dockerfile](singledocker/Dockerfile) for creating a docker image containing the whole LAMP stack + Drupal
 
 ![Single docker container drawing](images/singledocker.png)
 
@@ -96,7 +96,7 @@ Drupal can be provisioned in start.sh
 ```
 Tweak [singledocker/start.sh](singledocker/start.sh) for your deployment configuration 
 
-### docker-compose implementation for the whole stack
+### Docker compose implementation for the whole stack
 
 TODO: separate components into docker images and create a whole stack instance using "docker-compose up"
 
@@ -120,16 +120,20 @@ eu-central-1|xenial|16.04 LTS|amd64|instance-store|20171121.1|ami-2192104e|aki-1
 
 Once the AWS E2C instance has been created using AWS web console one can use the Ansible playbook from the first section to deploy the LAMP stack on the machine.
 
+```
+$ cd ansible
+$ ansible-playbook install-lamp.yml
+```
 Note: edit [ansible/inventory](ansible/inventory) to reflect your AWS instance IP address and credentials
 
-TODO: AWS account, register, screenshots  
+TODO: AWS screenshots  
 
 
 ## Install Drupal from an Ansible playbook
 
 *This is only applicable to the Vagrant, Bare metal, and AWS implementation as single docker image implementation and docker compose implementation already incorporates installation of Drupal into the docker image(s).*
 
-Here we used Jeff Geering's ansible roles for installing Drush, and Drush to deploy our Drupal site.
+Ansible script [ansible/install-drupal.yml](ansible/install-drupal) is installing [Drush](https://www.drupal.org/project/drush), and then uses Drush to deploy our Drupal site.
 
 To deploy Drupal, run the provided ansible playbook:
 ```
@@ -141,7 +145,7 @@ $ ansible-playbook install-drupal.yml
 
 ### Part 1: Testing a drupal site (service level ping)
 
-A RESTful ruby web application implemented using Sinatra to test a Drupal site for response code/content.  
+A Ruby REST web application implemented using Sinatra to test a Drupal site for response code/content.  
 
 A site is considered live when:
 - HTTP GET request returns status code 200 OK
@@ -152,7 +156,7 @@ A site is considered live when:
 Ruby script can start/stop the instance  
 TODO: this needs access to AWS, using AWS SDK - unable to test
 
-In the following ruby code is used to start an AWS instance:
+In the following Ruby code is used to start an AWS instance:
 ```
 require 'aws-sdk-ec2'  # v2: require 'aws-sdk'
 
@@ -210,6 +214,7 @@ TODO: return codes, for every case
 - [Drush to install Drupal](https://www.drupal.org/project/drush)
 - [ZopNow LAMP on docker](https://hub.docker.com/r/zopnow/lamp-stack/)
 - [Drupal in dockerhub](https://hub.docker.com/_/drupal/)
+- [DrupalVM: if you want to do the whole project in one shot](https://www.drupalvm.com/)
 
 
 
