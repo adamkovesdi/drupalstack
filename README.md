@@ -218,6 +218,11 @@ end
 TODO: return codes, for every case
 
 
+# Next steps
+
+- Provision Drupal with Drush profiles
+- High availability solutions using docker-swarm, MySQL HA, etc.
+- kubernetes implementation
 
 # Links, references
 
