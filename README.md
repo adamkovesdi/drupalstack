@@ -236,18 +236,56 @@ $ ansible-playbook install-drupal.yml
 
 ## Ruby application for monitoring a Drupal stack
 
-### Part 1: Testing a drupal site (service level ping)
+### Part 1: Monitoring a drupal site (service level ping)
 
-A Ruby REST web application implemented using Sinatra to test a Drupal site for response code/content.  
+![Ruby website monitor figure](images/monitor-protocol.png)
+
+A Ruby REST web [application](monitor/) implemented using Sinatra. Queries a Drupal or any other web site for response code/content.  
 
 A site is considered live when:
+- Low level ICMP ping request gets response
 - HTTP GET request returns status code 200 OK
-- Retrieved content matches a pre-defined pattern
+- HTTP headers match pre-defined pattern
+- Retrieved page content matches a pre-defined pattern
+
+REST API usage URL reference: GET request parameters
+```
+host	the hostname, FQDN, or IP address of the host to test
+port	web server port (optional, defaults to 80)
+```
+Example usage:
+```
+$ curl "http://localhost:4567/checkhost?host=drupal.org&port=80"
+```
+Response example:
+```
+HTTP response code: 200 message: OK content generator: Drupal 8 (https://www.drupal.org)
+
+```
+
+Business logic from the application:
+```
+def hostcontent(host,port)
+        port = 80 if port.nil?
+        result = String.new
+        begin
+                getresult = HTTParty.get("http://#{host}:#{port}/")
+                result << "HTTP response colde: " << getresult.code.to_s << "\n"
+                result << "message: " << getresult.message.to_s << "\n"
+                result << "content generator: " << getresult.headers['x-generator'] << "\n" unless getresult.headers['x-generator'].nil?
+        rescue Errno::ECONNREFUSED
+                result = "TCP connection to #{host}:#{port} failed"
+        rescue SocketError
+                result = "TCP connection to #{host} failed"
+        end
+        result
+end
+```
 
 ### Part 2: Bringing the site up/down on AWS
 
 Ruby script can start/stop the instance  
-TODO: this needs access to AWS, using AWS SDK - unable to test
+TODO: this needs access to AWS, using AWS SDK
 
 In the following Ruby code is used to start an AWS instance:
 ```
@@ -295,7 +333,7 @@ def stopinstance instancename
 end
 
 ```
-TODO: return codes, for every case
+TODO: implement return codes, handlers for every case
 
 
 # Next steps
@@ -314,6 +352,7 @@ TODO: return codes, for every case
 - [Drupal in dockerhub](https://hub.docker.com/_/drupal/)
 - [DrupalVM: if you want to do the whole project in one shot](https://www.drupalvm.com/)
 - [Docker data container volumes](https://medium.com/@rasheedamir/docker-good-bye-data-only-container-pattern-a28f90493a5a)
+- [MySQL High Availability Clustering](https://github.com/baqianxin/docker/blob/master/mysql_cluster/docker-compose.yml)
 
 
 
