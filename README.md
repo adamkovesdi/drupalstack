@@ -96,6 +96,19 @@ Drupal can be provisioned in start.sh
 ```
 Tweak [singledocker/start.sh](singledocker/start.sh) for your deployment configuration 
 
+#### Persistent storage for the single docker container
+
+First create docker volumes
+
+```
+docker volume create drupal-files
+docker volume create drupal-mysql
+```
+Run the drupal container with the following command to take advantage of persistent storage 
+```
+docker run --name=drupal-single -v drupal-files:/var/www/application -v drupal-mysql:/var/lib/mysql -it -p 9988:80 -p 13360:3360 drupal-single 
+```
+
 ### Docker compose implementation for the whole stack
 
 TODO: separate components into docker images and create a whole stack instance using "docker-compose up"
@@ -149,7 +162,7 @@ A Ruby REST web application implemented using Sinatra to test a Drupal site for 
 
 A site is considered live when:
 - HTTP GET request returns status code 200 OK
-- We can match some content to a pre-defined pattern
+- Retrieved content matches a pre-defined pattern
 
 ### Part 2: Bringing the site up/down on AWS
 
@@ -215,6 +228,7 @@ TODO: return codes, for every case
 - [ZopNow LAMP on docker](https://hub.docker.com/r/zopnow/lamp-stack/)
 - [Drupal in dockerhub](https://hub.docker.com/_/drupal/)
 - [DrupalVM: if you want to do the whole project in one shot](https://www.drupalvm.com/)
+- [Docker data container volumes](https://medium.com/@rasheedamir/docker-good-bye-data-only-container-pattern-a28f90493a5a)
 
 
 
