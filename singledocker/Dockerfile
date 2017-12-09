@@ -1,9 +1,10 @@
 #
-# DevOps challenge docker file for LAMP stack by adamkov
-# based on https://github.com/ZopNow/docker-lamp-stack
+# docker file for LAMP stack by adamkov
+# tailored for Drupal
 #
 
 FROM ubuntu:16.04
+MAINTAINER adamkov
 
 # APT package manager update and upgrade
 RUN apt-get update && apt-get upgrade -y
@@ -33,7 +34,6 @@ RUN apt-get install -y mysql-client mysql-server
 # Copy configurations
 WORKDIR /var/www/application
 COPY apache.config /etc/apache2/sites-available/000-default.conf
-# COPY index.php /var/www/application/public/
 COPY start.sh /usr/bin/
 
 # Copy Drupal tarball
