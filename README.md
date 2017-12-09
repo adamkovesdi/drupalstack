@@ -111,13 +111,55 @@ docker run --name=drupal-single -v drupal-files:/var/www/application -v drupal-m
 
 ### Docker compose implementation for the whole stack
 
-TODO: separate components into docker images and create a whole stack instance using "docker-compose up"
+Separate docker images for components of the stack with persistent volumes for Drupal files and MySQL database backend
 
 ![docker-compose implementation drawing](images/dockercompose-drupal.png)
 
 Component list:
 - MySQL instance
 - Apache web server + PHP installed and configured (drupal docker image)
+- Monitoring system written in Ruby
+
+[docker-compose.yml file](dockercompose/docker-compose.yml) for the Drupal stack
+```
+version: '2'
+
+networks:
+ prodnetwork:
+  driver: bridge
+
+services:
+ mysql:
+  image: mysql
+  networks:
+   - prodnetwork
+  ports:
+   - "3306:3306"
+  environment:
+    - 'MYSQL_ROOT_PASSWORD=password'
+  volumes:
+    - /var/lib/mysql
+
+ drupal:
+  image: drupal 
+  networks:
+   - prodnetwork
+  ports:
+   - 80:80
+  volumes:
+    - /var/www/html/modules
+    - /var/www/html/profiles
+    - /var/www/html/themes
+    - /var/www/html/sites
+  depends_on:
+    - mysql
+
+```
+
+To bring the whole Drupal stack up just run
+```
+$ docker-compose up
+```
 
 ### AWS E2C instance implementation
 
