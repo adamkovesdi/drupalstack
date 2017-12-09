@@ -1,6 +1,14 @@
-# DevOps Challenge entry by adamkov
+# Implementing Drupal hosting solutions
 
-## Creating the LAMP stack machine 
+## Creating a LAMP stack machine 
+
+In order to be able to host Drupal one needs a machine/VM/cloud instance with a running webserver, PHP interpreter, and a database backend.  
+In this document I will outline multiple ways to implement that solution.  
+
+Components:
+- Apache 2 web server
+- PHP 7
+- MySQL database
 
 ### a) Vagrant box implementation
 
