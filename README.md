@@ -11,17 +11,23 @@ Multiple ways to implement the hosting platform:
 - Single Docker image for the whole LAMP stack + Drupal
 - Docker compose set of images running components of the stack
 
-Components of the stack:
+Components of the LAMP stack:
 - Apache 2 web server
 - PHP 7
 - MySQL database
-- Drupal
 
 ### Vagrant box implementation
 
 LAMP stack machine is a Vagrant VM based on official Ubuntu Xenial image  
 Vagrant file for setting up a new VM is present in [vagrant/Vagrantfile](vagrant/Vagrantfile)  
 Vagrant VM provisioning shell script can be found in [vagrant/initvm.sh](vagrant/initvm.sh)   
+
+![Vagrant VM drawing](images/vagrant-solution.png)
+
+- [Vagrantfile](vagrant/Vagrantfile): creates the Vagrant box, initial config memory, networking, IP address, etc.
+- [initvm.sh](vagrant/initvm.sh): provisions Vagrant box, configures user account, deploys python for Ansible
+- [install-lamp](ansible/install-lamp.yml): Ansible playbook to deploy the LAMP stack
+- [install-drupal.yml](ansible/install-drupal.yml): Ansible playbook to deploy Drupal
 
 Launch and connect to Vagrant box:
 ```
@@ -65,9 +71,11 @@ Comments on my playbook:
 
 TODO: separate playbook functionality into roles
 
-### Single docker image implementation
+### Single docker container implementation
 
-Created a custom Dockerfile for having a docker image containing the whole LAMP stack.
+Custom Dockerfile for creating a docker image containing the whole LAMP stack.
+
+![Single docker container drawing](images/singledocker.png)
 
 Tweaked Dockerfile [singledocker/Dockerfile](singledocker/Dockerfile)
 ```
@@ -77,20 +85,22 @@ TODO: embed dockerfile here
 Building the docker image
 ```
 $ cd singledocker
-$ docker build -t lamp .
+$ docker build -t drupal-single .
 ```
 Running the docker image
 ```
-$ docker run --name=lamp -it -p 9980:80 -p 93360:3360 lamp
+$ docker run --name=drupal-single -it -p 9980:80 -p 93360:3360 drupal-single
 
 this will run the docker image and publish the web service port on 9980 of the docker machine
-Drupal setup is done in start.sh
+Drupal can be provisioned in start.sh
 ```
-Tweak [singledocker/start.sh](singledocker/start.sh) for your Drupal config
+Tweak [singledocker/start.sh](singledocker/start.sh) for your deployment configuration 
 
 ### docker-compose implementation for the whole stack
 
 TODO: separate components into docker images and create a whole stack instance using "docker-compose up"
+
+![docker-compose implementation drawing](images/dockercompose-drupal.png)
 
 Component list:
 - MySQL instance
@@ -100,18 +110,32 @@ Component list:
 
 The LAMP stack hosting machine can be an AWS E2C instance (t2.micro is free for testing).
 
+![AWS E2C simple impementation drawing](images/aws-drupal.png)
+
+Use Ubuntu xenial AMI as a base for the instance. e.g.
+
+Zone|Name|Version|Arch|Instance Type|Release|AMI-ID|AKI-ID
+--|--|--|--|--|--|--|--
+eu-central-1|xenial|16.04 LTS|amd64|instance-store|20171121.1|ami-2192104e|aki-184c7a05
+
 Once the AWS E2C instance has been created using AWS web console one can use the Ansible playbook from the first section to deploy the LAMP stack on the machine.
+
+Note: edit [ansible/inventory](ansible/inventory) to reflect your AWS instance IP address and credentials
 
 TODO: AWS account, register, screenshots  
 
 
 ## Install Drupal from an Ansible playbook
 
-*This is only applicable to the Vagrant and AWS implementation as single docker image implementation and docker compose implementation already incorporates the installation of Drupal to the docker image(s).*
+*This is only applicable to the Vagrant, Bare metal, and AWS implementation as single docker image implementation and docker compose implementation already incorporates installation of Drupal into the docker image(s).*
 
-TODO: work out this section
+Here we used Jeff Geering's ansible roles for installing Drush, and Drush to deploy our Drupal site.
 
-Here we used Jeff Geering's ansible roles for installing Drush, and Drush
+To deploy Drupal, run the provided ansible playbook:
+```
+$ cd ansible
+$ ansible-playbook install-drupal.yml
+```
 
 ## Ruby application for monitoring a Drupal stack
 
@@ -123,12 +147,12 @@ A site is considered live when:
 - HTTP GET request returns status code 200 OK
 - We can match some content to a pre-defined pattern
 
-### Part 2: Bringing the site up/down
+### Part 2: Bringing the site up/down on AWS
 
-If the service is runnig on AWS the provided ruby script can start/stop the instance  
+Ruby script can start/stop the instance  
 TODO: this needs access to AWS, using AWS SDK - unable to test
 
-In the ruby application the following code is used to start an AWS instance:
+In the following ruby code is used to start an AWS instance:
 ```
 require 'aws-sdk-ec2'  # v2: require 'aws-sdk'
 
@@ -182,7 +206,9 @@ TODO: return codes, for every case
 
 - [Readme driven development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html)
 - [Jeff Geerling's excellent ansible roles](https://github.com/geerlingguy/ansible-role-drupal)
-- [ZopNow LAMP on docker](https://github.com/ZopNow/docker-lamp-stack)
+- [Amazon E2C AMI locator](https://cloud-images.ubuntu.com/locator/ec2/)
+- [Drush to install Drupal](https://www.drupal.org/project/drush)
+- [ZopNow LAMP on docker](https://hub.docker.com/r/zopnow/lamp-stack/)
 - [Drupal in dockerhub](https://hub.docker.com/_/drupal/)
 
 

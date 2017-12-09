@@ -1,7 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 #
-# Vagrantfile by adamkov for DevOps challenge (c) 2017
+# Vagrantfile for LAMP stack VM by adamkov
+#
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
