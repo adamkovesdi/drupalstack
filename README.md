@@ -130,7 +130,7 @@ Running the docker image
 $ docker run --name=drupal-single -it -p 9980:80 -p 93360:3360 drupal-single
 
 this will run the docker image and publish the web service port on 9980 of the docker machine
-Drupal can be provisioned in start.sh
+on first run you have to configure Drupal
 ```
 Tweak [singledocker/start.sh](singledocker/start.sh) for your deployment configuration 
 
@@ -144,7 +144,7 @@ docker volume create drupal-mysql
 ```
 Run the drupal container with the following command to take advantage of persistent storage 
 ```
-docker run --name=drupal-single -v drupal-files:/var/www/application -v drupal-mysql:/var/lib/mysql -it -p 9988:80 -p 13360:3360 drupal-single 
+docker run --name=drupal-single -v drupal-files:/var/www/application -v drupal-mysql:/var/lib/mysql -it -p 9980:80 -p 13360:3360 drupal-single 
 ```
 
 ### Docker compose implementation for the whole stack
