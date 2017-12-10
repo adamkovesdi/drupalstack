@@ -25,7 +25,7 @@ Vagrant VM provisioning shell script can be found in [vagrant/initvm.sh](vagrant
 ![Vagrant VM drawing](images/vagrant-solution.png)
 
 - [Vagrantfile](vagrant/Vagrantfile): creates the Vagrant box, initial config memory, networking, IP address, etc.
-- [initvm.sh](vagrant/initvm.sh): provisions Vagrant box, configures user account, deploys python for Ansible
+- [initvm.sh](vagrant/initvm.sh): configures user account, deploys python for Ansible (automatically called by vagrant up)
 - [install-lamp.yml](ansible/install-lamp.yml): Ansible playbook to deploy the LAMP stack
 - [install-drupal.yml](ansible/install-drupal.yml): Ansible playbook to deploy Drupal
 
@@ -154,8 +154,8 @@ Separate docker images for components of the stack with persistent volumes for D
 ![docker-compose implementation drawing](images/dockercompose-drupal.png)
 
 Component list:
-- MySQL instance
-- Apache web server + PHP installed and configured (drupal docker image)
+- MySQL instance (with persistent storage)
+- Apache web server + PHP installed and configured (drupal docker image with persistent storage)
 - Monitoring system written in Ruby
 
 [docker-compose.yml file](dockercompose/docker-compose.yml) for the Drupal stack
