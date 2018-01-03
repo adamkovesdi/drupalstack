@@ -226,7 +226,7 @@ TODO: AWS screenshots
 
 *This is only applicable to the Vagrant, Bare metal, and AWS implementation as single docker image implementation and docker compose implementation already incorporates installation of Drupal into the docker image(s).*
 
-Ansible script [ansible/install-drupal.yml](ansible/install-drupal) is installing [Drush](https://www.drupal.org/project/drush), and then uses Drush to deploy our Drupal site.
+Ansible script [ansible/install-drupal.yml](ansible/install-drupal.yml) is installing [Drush](https://www.drupal.org/project/drush), and then uses Drush to deploy our Drupal site.
 
 To deploy Drupal, run the provided ansible playbook:
 ```
